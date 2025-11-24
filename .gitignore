@@ -1,0 +1,72 @@
+############################
+# IntelliJ IDEA
+############################
+.idea/
+*.iml
+*.iws
+*.ipr
+/shelf/
+/workspace.xml
+
+############################
+# VS Code
+############################
+.vscode/
+
+############################
+# Java & Spring Boot
+############################
+*.class
+*.jar
+*.war
+*.ear
+*.class
+
+# Spring Boot generated files
+HELP.md
+
+############################
+# Maven
+############################
+target/
+.mvn/
+!.mvn/wrapper/maven-wrapper.jar   # Keep Maven wrapper jar
+
+############################
+# Environment Variables
+############################
+.env
+.env.local
+.env.*.local
+*.env
+
+############################
+# Database Files
+############################
+*.db
+*.sqlite
+*.sqlite3
+/data/                     # Your data directory
+
+############################
+# Logs
+############################
+logs/
+*.log
+
+############################
+# OS Generated Files
+############################
+.DS_Store
+Thumbs.db
+
+############################
+# Temporary Files
+############################
+*.tmp
+*.temp
+*.swp
+*~
+
+
+
