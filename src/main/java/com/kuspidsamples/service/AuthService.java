@@ -44,14 +44,15 @@ public class AuthService {
         this.tokenProvider = tokenProvider;
     }
 
+    /**
+     * Register a new user
+     */
     @Transactional
     public AuthResponse register(RegisterRequest request) {
-        // Check if username exists
+        // Validate username & email uniqueness
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new BadRequestException(Constants.USERNAME_ALREADY_EXISTS);
         }
-
-        // Check if email exists
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new BadRequestException(Constants.EMAIL_ALREADY_EXISTS);
         }
@@ -81,35 +82,35 @@ public class AuthService {
         );
     }
 
+    /**
+     * Login a user
+     */
     @Transactional
     public AuthResponse login(LoginRequest request) {
-        // Authenticate user
+        // Authenticate credentials
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getUsernameOrEmail(),
                         request.getPassword()
                 )
         );
-
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        // Get user
+        // Retrieve user
         User user = userRepository.findByUsernameOrEmail(
                 request.getUsernameOrEmail(),
                 request.getUsernameOrEmail()
         ).orElseThrow(() -> new UnauthorizedException(Constants.INVALID_CREDENTIALS));
 
-        // Check if account is locked
+        // Check account status
         if (!user.getAccountNonLocked()) {
             throw new UnauthorizedException(Constants.ACCOUNT_LOCKED);
         }
-
-        // Check if account is enabled
         if (!user.getEnabled()) {
             throw new UnauthorizedException(Constants.ACCOUNT_DISABLED);
         }
 
-        // Update last login and reset failed attempts
+        // Update login info
         user.updateLastLogin();
         user.resetFailedLoginAttempts();
         userRepository.save(user);
@@ -128,20 +129,20 @@ public class AuthService {
         );
     }
 
+    /**
+     * Refresh access token using refresh token
+     */
     @Transactional
     public AuthResponse refreshToken(String refreshTokenString) {
         RefreshToken refreshToken = refreshTokenRepository.findByToken(refreshTokenString)
                 .orElseThrow(() -> new UnauthorizedException(Constants.INVALID_TOKEN));
 
-        // Check if token is expired
         if (refreshToken.getExpiryDate().isBefore(Instant.now())) {
             refreshTokenRepository.delete(refreshToken);
             throw new UnauthorizedException(Constants.TOKEN_EXPIRED);
         }
 
         User user = refreshToken.getUser();
-
-        // Generate new access token
         String accessToken = tokenProvider.generateTokenFromUsername(user.getUsername());
 
         return new AuthResponse(
@@ -154,13 +155,16 @@ public class AuthService {
         );
     }
 
+    /**
+     * Logout user (delete refresh token)
+     */
     @Transactional
     public void logout(String refreshTokenString) {
         refreshTokenRepository.deleteByToken(refreshTokenString);
     }
 
     /**
-     * Create and save refresh token
+     * Create a new refresh token for a user
      */
     private String createRefreshToken(User user) {
         RefreshToken refreshToken = new RefreshToken();

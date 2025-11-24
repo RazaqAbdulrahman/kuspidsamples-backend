@@ -23,7 +23,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-@Profile("dev") // ONLY loads during development
+@Profile("dev")
 public class DevSecurityConfig {
 
     private final UserDetailsServiceImpl userDetailsServiceImpl;
@@ -56,15 +56,13 @@ public class DevSecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig)
-            throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
     }
 
     @Bean
     public SecurityFilterChain devFilterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(csrf -> csrf.disable())
+        http.csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -72,7 +70,7 @@ public class DevSecurityConfig {
                         .requestMatchers(Constants.PUBLIC_URLS).permitAll()
                         .requestMatchers("/", "/health", "/actuator/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
-                        .anyRequest().permitAll() // ✓ Easier dev testing
+                        .anyRequest().permitAll()
                 );
 
         http.headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()));

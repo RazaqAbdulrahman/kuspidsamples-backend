@@ -2,12 +2,13 @@ package com.kuspidsamples.security;
 
 import com.kuspidsamples.entity.User;
 import io.jsonwebtoken.*;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,13 +22,24 @@ public class JwtService {
     @Value("${jwt.expiration}")
     private long jwtExpirationMs;
 
-    private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
+    @PostConstruct
+    public void checkJwtSecret() {
+        System.out.println("JWT Secret length: " + (jwtSecret != null ? jwtSecret.length() : "null"));
     }
 
-    // =============================
-    //        GENERATE TOKEN
-    // =============================
+    /**
+     * Returns a signing key. Throws a clear error if secret is invalid.
+     */
+    private SecretKey getSigningKey() {
+        if (jwtSecret == null || jwtSecret.trim().length() < 32) {
+            throw new IllegalStateException(
+                    "JWT secret is invalid. Ensure jwt.secret is set in .env or application.properties " +
+                            "and is at least 32 characters long for HS256"
+            );
+        }
+        return Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+    }
+
     public String generateToken(User user) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", user.getRole().name());
@@ -46,9 +58,6 @@ public class JwtService {
                 .compact();
     }
 
-    // =============================
-    //      VALIDATION HELPERS
-    // =============================
     public boolean isTokenValid(String token, User user) {
         String username = extractUsername(token);
         return username.equals(user.getUsername()) && !isTokenExpired(token);
@@ -58,9 +67,6 @@ public class JwtService {
         return extractExpiration(token).before(new Date());
     }
 
-    // =============================
-    //        EXTRACT DATA
-    // =============================
     public String extractUsername(String token) {
         return extractAllClaims(token).getSubject();
     }
