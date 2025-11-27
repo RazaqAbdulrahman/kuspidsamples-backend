@@ -20,6 +20,20 @@ public class CloudinaryConfig {
 
     @Bean
     public Cloudinary cloudinary() {
+
+        // Validate env variables (fail fast)
+        if (cloudName == null || cloudName.isEmpty()) {
+            throw new IllegalStateException("❌ Missing Cloudinary config: cloudinary.cloud-name");
+        }
+        if (apiKey == null || apiKey.isEmpty()) {
+            throw new IllegalStateException("❌ Missing Cloudinary config: cloudinary.api-key");
+        }
+        if (apiSecret == null || apiSecret.isEmpty()) {
+            throw new IllegalStateException("❌ Missing Cloudinary config: cloudinary.api-secret");
+        }
+
+        System.out.println("✅ Cloudinary configuration loaded successfully");
+
         return new Cloudinary(ObjectUtils.asMap(
                 "cloud_name", cloudName,
                 "api_key", apiKey,
