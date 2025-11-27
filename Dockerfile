@@ -28,8 +28,10 @@ EXPOSE 8080
 
 # Default environment variables (dev-friendly)
 ENV SPRING_PROFILES_ACTIVE=dev
-ENV JWT_SECRET=""           # Dev: auto-generated if empty
-ENV JWT_EXPIRATION=3600000  # 1 hour default
+ENV JWT_SECRET=""
+# Dev: auto-generated if empty
+ENV JWT_EXPIRATION=3600000
+ # 1 hour default
 
 # Example prod variables (override these at runtime)
 # ENV DATABASE_URL="jdbc:postgresql://host:port/dbname"
