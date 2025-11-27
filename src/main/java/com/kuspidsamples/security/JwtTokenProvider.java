@@ -36,13 +36,11 @@ public class JwtTokenProvider {
         }
     }
 
-    // Generate token from Authentication
     public String generateToken(Authentication authentication) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         return generateTokenFromUsername(userDetails.getUsername());
     }
 
-    // Generate token from username
     public String generateTokenFromUsername(String username) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpiration);
@@ -55,7 +53,6 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    // Get username from JWT
     public String getUsernameFromToken(String token) {
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(key)
@@ -65,7 +62,6 @@ public class JwtTokenProvider {
         return claims.getSubject();
     }
 
-    // Validate JWT
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder()
@@ -77,5 +73,9 @@ public class JwtTokenProvider {
             System.err.println("Invalid JWT token: " + e.getMessage());
         }
         return false;
+    }
+
+    public long getJwtExpiration() {
+        return jwtExpiration;
     }
 }

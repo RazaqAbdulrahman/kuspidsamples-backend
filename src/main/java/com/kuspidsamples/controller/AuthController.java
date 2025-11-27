@@ -49,9 +49,6 @@ public class AuthController {
         return ResponseEntity.ok(new ApiResponse<>(true, Constants.LOGOUT_SUCCESS, null));
     }
 
-    /**
-     * Generic API Response wrapper
-     */
     public static class ApiResponse<T> {
         private boolean success;
         private String message;
@@ -63,7 +60,6 @@ public class AuthController {
             this.data = data;
         }
 
-        // Getters and Setters
         public boolean isSuccess() { return success; }
         public void setSuccess(boolean success) { this.success = success; }
         public String getMessage() { return message; }

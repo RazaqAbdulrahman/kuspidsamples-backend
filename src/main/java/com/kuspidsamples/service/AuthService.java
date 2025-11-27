@@ -44,12 +44,8 @@ public class AuthService {
         this.tokenProvider = tokenProvider;
     }
 
-    /**
-     * Register a new user
-     */
     @Transactional
     public AuthResponse register(RegisterRequest request) {
-        // Validate username & email uniqueness
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new BadRequestException(Constants.USERNAME_ALREADY_EXISTS);
         }
@@ -57,7 +53,6 @@ public class AuthService {
             throw new BadRequestException(Constants.EMAIL_ALREADY_EXISTS);
         }
 
-        // Create new user
         User user = new User();
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
@@ -68,7 +63,6 @@ public class AuthService {
 
         user = userRepository.save(user);
 
-        // Generate tokens
         String accessToken = tokenProvider.generateTokenFromUsername(user.getUsername());
         String refreshToken = createRefreshToken(user);
 
@@ -82,12 +76,8 @@ public class AuthService {
         );
     }
 
-    /**
-     * Login a user
-     */
     @Transactional
     public AuthResponse login(LoginRequest request) {
-        // Authenticate credentials
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getUsernameOrEmail(),
@@ -96,13 +86,11 @@ public class AuthService {
         );
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        // Retrieve user
         User user = userRepository.findByUsernameOrEmail(
                 request.getUsernameOrEmail(),
                 request.getUsernameOrEmail()
         ).orElseThrow(() -> new UnauthorizedException(Constants.INVALID_CREDENTIALS));
 
-        // Check account status
         if (!user.getAccountNonLocked()) {
             throw new UnauthorizedException(Constants.ACCOUNT_LOCKED);
         }
@@ -110,12 +98,10 @@ public class AuthService {
             throw new UnauthorizedException(Constants.ACCOUNT_DISABLED);
         }
 
-        // Update login info
         user.updateLastLogin();
         user.resetFailedLoginAttempts();
         userRepository.save(user);
 
-        // Generate tokens
         String accessToken = tokenProvider.generateToken(authentication);
         String refreshToken = createRefreshToken(user);
 
@@ -129,9 +115,6 @@ public class AuthService {
         );
     }
 
-    /**
-     * Refresh access token using refresh token
-     */
     @Transactional
     public AuthResponse refreshToken(String refreshTokenString) {
         RefreshToken refreshToken = refreshTokenRepository.findByToken(refreshTokenString)
@@ -155,17 +138,11 @@ public class AuthService {
         );
     }
 
-    /**
-     * Logout user (delete refresh token)
-     */
     @Transactional
     public void logout(String refreshTokenString) {
         refreshTokenRepository.deleteByToken(refreshTokenString);
     }
 
-    /**
-     * Create a new refresh token for a user
-     */
     private String createRefreshToken(User user) {
         RefreshToken refreshToken = new RefreshToken();
         refreshToken.setToken(UUID.randomUUID().toString());
