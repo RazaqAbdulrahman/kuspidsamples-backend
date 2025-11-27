@@ -26,11 +26,11 @@ public class JwtTokenProvider {
 
     @PostConstruct
     public void init() {
-        if (jwtSecret == null || jwtSecret.isEmpty()) {
-            // Generate a secure random secret for dev automatically
-            key = Keys.secretKeyFor(SignatureAlgorithm.HS512);
+        // Ensure key is at least 256 bits for HS512
+        if (jwtSecret == null || jwtSecret.length() < 32) {
+            key = Keys.secretKeyFor(SignatureAlgorithm.HS512); // guaranteed secure
             jwtSecret = Base64.getEncoder().encodeToString(key.getEncoded());
-            System.out.println("⚠️ JWT_SECRET was empty. Generated temporary secret for dev: " + jwtSecret);
+            System.out.println("⚠️ JWT_SECRET was empty or too weak. Generated temporary secret for dev: " + jwtSecret);
         } else {
             key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
         }

@@ -4,6 +4,5 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class JwtConfig {
-    // Nothing needed here for JwtTokenProvider
+    // Nothing needed here — JwtTokenProvider is auto-injected
 }
-
