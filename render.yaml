@@ -1,0 +1,39 @@
+services:
+  - type: web
+    name: kuspidsamples-api
+    env: java
+    plan: starter
+    branch: main
+
+    buildCommand: mvn clean package -DskipTests
+    startCommand: java -jar target/kuspidsamples-backend-0.0.1-SNAPSHOT.jar
+
+    autoDeploy: true
+
+    envVars:
+      # Spring / App Config
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+
+      # Security
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRATION
+        value: "3600000"
+
+      # Cloudinary
+      - key: CLOUDINARY_CLOUD_NAME
+      - key: CLOUDINARY_API_KEY
+      - key: CLOUDINARY_API_SECRET
+
+      # Database Connection
+      - key: DATABASE_URL
+        fromDatabase:
+          name: kuspidsamples-db
+          property: connectionString
+
+databases:
+  - name: kuspidsamples-db
+    plan: starter
+    databaseName: kuspidsamples
+    user: kuspidsamples
