@@ -5,6 +5,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -16,6 +18,7 @@ import java.util.List;
 @Configuration
 public class SecurityConfig {
 
+    // --- Security filter chain ---
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
@@ -30,18 +33,18 @@ public class SecurityConfig {
         return http.build();
     }
 
+    // --- CORS configuration ---
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
 
         CorsConfiguration config = new CorsConfiguration();
 
-        // Allow Lovable previews, local dev, and prod frontend
         config.setAllowedOriginPatterns(Arrays.asList(
-                "https://*.lovable.app",
-                "http://localhost:3000",
+                "https://*.lovable.app",                      // Lovable previews
+                "http://localhost:3000",                      // Local dev
                 "http://localhost:4200",
                 "http://localhost:5173",
-                "https://kuspidsamples-frontend.onrender.com"
+                "https://kuspidsamples.onrender.com" // Production frontend
         ));
 
         config.setAllowedMethods(Arrays.asList(
@@ -62,5 +65,11 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", config);
 
         return source;
+    }
+
+    // --- Password encoder ---
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }
