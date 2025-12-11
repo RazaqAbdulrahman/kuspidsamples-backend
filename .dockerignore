@@ -1,0 +1,23 @@
+# Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!.mvn/wrapper/maven-wrapper.properties
+
+# Logs
+logs/
+*.log
+
+# System files
+*.DS_Store
+*.class
+
+# IntelliJ
+.idea/
+*.iml
+
+# Git
+.git/
+.gitignore
+
+# Env files
+.env

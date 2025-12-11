@@ -9,6 +9,13 @@
 /workspace.xml
 
 ############################
+# application properties
+############################
+
+application.properties
+
+
+############################
 # VS Code
 ############################
 .vscode/
