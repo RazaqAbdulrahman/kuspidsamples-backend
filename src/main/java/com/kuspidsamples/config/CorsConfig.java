@@ -13,7 +13,7 @@ import java.util.List;
  * Global CORS configuration for the backend.
  *
  * - Supports dynamic frontend URL via environment variable FRONTEND_URL
- * - Falls back to localhost defaults for local development
+ * - Includes localhost defaults for local development
  * - Configured for production readiness
  */
 @Configuration
@@ -24,13 +24,14 @@ public class CorsConfig {
 
         CorsConfiguration config = new CorsConfiguration();
 
-        // Resolve frontend origins from environment or fallback (useful for Docker / CI / Production)
-        String frontendUrl = System.getenv().getOrDefault("FRONTEND_URL", "http://localhost:3000");
+        // Resolve frontend origins from environment or fallback
+        String frontendUrl = System.getenv().getOrDefault("FRONTEND_URL", "https://kuspidsamples.onrender.com");
 
-        // Allowed origins (dynamic + common dev ports)
+        // Allowed origins (production + local dev)
         config.setAllowedOrigins(Arrays.asList(
-                frontendUrl,
-                "http://localhost:3000",
+                frontendUrl,                // Production frontend
+                "https://kuspidsamples.onrender.com", // Explicit prod URL
+                "http://localhost:3000",    // Lovable local dev
                 "http://localhost:4200",
                 "http://localhost:5173"
         ));
