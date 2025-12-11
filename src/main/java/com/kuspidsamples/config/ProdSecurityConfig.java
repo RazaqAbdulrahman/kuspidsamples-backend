@@ -20,6 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.http.HttpMethod;
 
 @Configuration
 @EnableWebSecurity
@@ -67,19 +68,45 @@ public class ProdSecurityConfig {
 
     @Bean
     public SecurityFilterChain prodFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(csrf -> csrf.disable())
+
+        http
+                // Disable CSRF because this is a stateless REST API
+                .csrf(csrf -> csrf.disable())
+
+                // Apply global CORS config
                 .cors(cors -> cors.configurationSource(corsConfigurationSource))
+
+                // Handle authentication failures
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint))
+
+                // Make authentication stateless (no sessions)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+                // Authorization rules
                 .authorizeHttpRequests(auth -> auth
+                        // 🔥 FIX: allow all CORS preflight OPTIONS requests
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                        // Public routes from Constants.PUBLIC_URLS (e.g., /api/auth/register, /api/auth/login)
                         .requestMatchers(Constants.PUBLIC_URLS).permitAll()
+
+                        // Health check endpoints
                         .requestMatchers("/", "/health", "/actuator/**").permitAll()
+
+                        // Admin API must be authenticated and have ADMIN role
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
+                        // Everything else requires authentication
                         .anyRequest().authenticated()
                 );
 
+        // Authentication provider (DAO + password encoder)
         http.authenticationProvider(authenticationProvider());
+
+        // Rate limit filter before JWT filter
         http.addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class);
+
+        // JWT authentication filter before UsernamePasswordAuthenticationFilter
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
