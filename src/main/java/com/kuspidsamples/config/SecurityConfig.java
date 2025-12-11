@@ -14,7 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Configuration
-public class ProdSecurityConfig {
+public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -23,7 +23,7 @@ public class ProdSecurityConfig {
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/auth/**", "/health", "/").permitAll()
                         .anyRequest().authenticated()
                 );
 
@@ -32,26 +32,31 @@ public class ProdSecurityConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
+
         CorsConfiguration config = new CorsConfiguration();
 
-        // 🔥 VERY IMPORTANT: Add your Lovable frontend domain
-        config.setAllowedOrigins(List.of(
-                "https://id-preview--aba1717b-9945-4abf-8282-289d97d2699f.lovable.app",
-                "https://kuspidsamples-frontend.lovable.app"
+        // Allow Lovable previews, local dev, and prod frontend
+        config.setAllowedOriginPatterns(Arrays.asList(
+                "https://*.lovable.app",
+                "http://localhost:3000",
+                "http://localhost:4200",
+                "http://localhost:5173",
+                "https://kuspidsamples-frontend.onrender.com"
         ));
 
-        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-
-        config.setAllowedHeaders(Arrays.asList(
-                "Authorization",
-                "Content-Type",
-                "X-Requested-With",
-                "Accept"
+        config.setAllowedMethods(Arrays.asList(
+                HttpMethod.GET.name(),
+                HttpMethod.POST.name(),
+                HttpMethod.PUT.name(),
+                HttpMethod.PATCH.name(),
+                HttpMethod.DELETE.name(),
+                HttpMethod.OPTIONS.name()
         ));
 
-        config.setExposedHeaders(List.of("Authorization"));
-
+        config.setAllowedHeaders(List.of("*"));
+        config.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
         config.setAllowCredentials(true);
+        config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);

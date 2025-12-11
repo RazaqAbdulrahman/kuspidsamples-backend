@@ -1,3 +1,4 @@
+/*
 package com.kuspidsamples.controller;
 
 import org.springframework.http.ResponseEntity;
@@ -11,3 +12,5 @@ public class OptionsController {
         return ResponseEntity.ok().build();
     }
 }
+
+ */
